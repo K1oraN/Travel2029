@@ -8,7 +8,7 @@
     "check": "node --check public/app.js && node --check netlify/lib/shared.mjs && node --check netlify/functions/auth.mjs && node --check netlify/functions/progress.mjs"
   },
   "dependencies": {
-    "@netlify/blobs": "11.1.10"
+    "@netlify/blobs": "11.1.9"
   },
   "engines": {
     "node": ">=22.12"
