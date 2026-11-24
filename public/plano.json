@@ -1,0 +1,18 @@
+{
+  "titulo": "Um dia de cada vez. Uma viagem para dois.",
+  "inicio": "2026-11-24",
+  "fim": "2029-08-31",
+  "dias": 1012,
+  "metaDiariaPorPessoaBRL": 30,
+  "destinoDiarioEurosBRL": 23,
+  "destinoDiarioPassagemBRL": 7,
+  "metaTotalEuropaPorPessoaEUR": 3219.2,
+  "airbnbPorPessoaEUR": 944,
+  "chipESeguroPorPessoaEUR": 85,
+  "passagemPorPessoaBRL": 6500,
+  "cotacaoPlanejamentoBRLPorEUR": 7,
+  "intervaloCambioDias": 49,
+  "metaTotalCasalBRL": 58068.8,
+  "referencia": "Europa_2029_Plano_Economia_Diario_Semanal_Mensal.pdf",
+  "nota": "Todos os valores refletem o plano original e são metas, não saldos bancários nem cotações reais."
+}

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#182d49">
+  <meta name="description" content="Diário de economia Europa 2029 - progresso compartilhado do casal, protegido por senha.">
+  <title>Europa 2029 • Um dia de cada vez</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" type="module" defer></script>
+</head>
+<body>
+  <div class="background-orb" aria-hidden="true"></div>
+  <main id="loginView" class="login-layout">
+    <div class="login-brand">
+      <span class="eyebrow">PLANEJAMENTO FINANCEIRO <span class="slash">/</span> EUROPA 2029</span>
+      <div class="brand-mark">✦ <span>Nossa viagem</span></div>
+      <h1>Um dia de cada vez.<br><span>Uma viagem para dois.</span></h1>
+      <p>R$ 30 por pessoa a cada dia. Uma meta compartilhada até setembro de 2029.</p>
+      <div class="login-timeline"><span>24 NOV 2026</span><div class="thin-track"><i></i></div><span>31 AGO 2029</span></div>
+      <div class="travel-route">LISBOA <span>•</span> PORTO <span>•</span> MADRI <span>•</span> BARCELONA <span>•</span> PARIS</div>
+    </div>
+    <section class="login-card" aria-label="Entrar no diário">
+      <div class="login-icon">✦</div>
+      <h2>Nosso cantinho</h2>
+      <p>Entre com a sua senha para acompanhar o progresso do casal.</p>
+      <form id="loginForm">
+        <label class="field-label" for="loginRole">Tipo de acesso</label>
+        <select id="loginRole" required><option value="admin">Administrador · posso marcar</option><option value="viewer">Visualização · acompanho</option></select>
+        <label class="field-label" for="loginPassword">Senha</label>
+        <input id="loginPassword" name="password" type="password" autocomplete="current-password" minlength="12" placeholder="Sua senha de acesso" required>
+        <p id="loginError" class="error-text" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary btn-full" id="loginButton">Entrar no nosso plano <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="privacy-note">🔒 A senha é verificada no servidor. Os registros ficam salvos na Netlify e sincronizam entre dispositivos.</p>
+    </section>
+  </main>
+
+  <div id="appView" class="app-layout" hidden>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="identity"><span class="identity-symbol">✦</span><span>EUROPA <strong>2029</strong><small>DIÁRIO DE ECONOMIA</small></span></div>
+        <div class="header-actions"><span class="role-chip" id="roleChip">Visualização</span><span class="save-indicator" id="saveState">● Sincronizado</span><button class="icon-button" id="logoutButton" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+      </div>
+    </header>
+    <div class="content-wrap">
+      <div class="top-note"><span class="small-dash"></span>O NOSSO FUTURO ESTÁ SENDO CONSTRUÍDO HOJE</div>
+      <section class="hero">
+        <div class="hero-copy"><span class="hero-label">NOSSO PLANO · 24 NOV 2026 — 31 AGO 2029</span><h1>Um dia de cada vez.<br><em>Uma viagem para dois.</em></h1><p>Cada pequeno depósito aproxima a gente de uma lembrança inesquecível.</p><div class="hero-actions"><button class="btn btn-light" id="heroToday">Marcar economia de hoje <span>↗</span></button><span id="lastSync">Última atualização: ainda não registrada</span></div></div>
+        <div class="hero-counter"><span>META DO CASAL</span><strong>R$ 60.720</strong><small>1.012 dias • R$ 60 por dia</small><div class="hero-ornament"><span>✦</span><span>✦</span><span>✦</span></div></div>
+      </section>
+      <section class="stats-grid" aria-label="Resumo das economias">
+        <article class="stat-card"><span>JÁ ECONOMIZAMOS</span><strong id="statSaved">R$ 0,00</strong><small>total registrado dos dois</small><div class="accent-line"></div></article>
+        <article class="stat-card"><span>FALTA PARA A META</span><strong id="statRemaining">R$ 60.720</strong><small>meta total menos registrado</small><div class="accent-line pale"></div></article>
+        <article class="stat-card"><span>DIAS COMPLETOS</span><strong id="statDays">0 <small>/ 1.012</small></strong><small>ambos guardaram R$ 30</small><div class="accent-line gold"></div></article>
+        <article class="stat-card"><span>PROGRESSO DO CASAL</span><strong id="statPercent">0,0%</strong><small>da meta financeira</small><div class="accent-line pale"></div></article>
+      </section>
+      <nav class="tabs" aria-label="Seções do diário">
+        <button class="tab active" data-tab="resumo">✦ <span>Visão geral</span></button>
+        <button class="tab" data-tab="diario">▦ <span>Diário</span></button>
+        <button class="tab" data-tab="semanas">▤ <span>Semanas</span></button>
+        <button class="tab" data-tab="meses">◫ <span>Meses</span></button>
+        <button class="tab" data-tab="cambio">€ <span>Trocar euros</span></button>
+        <button class="tab" data-tab="config">⚙ <span>Configurações</span></button>
+      </nav>
+      <div id="flashMessage" class="flash" role="status" hidden></div>
+
+      <section class="tab-panel" id="panel-resumo">
+        <div class="two-col">
+          <article class="white-card"><div class="section-header"><div><span class="eyebrow blue">JUNTOS NESSA JORNADA</span><h2>Progresso individual</h2></div><span class="decorative-heart">♡</span></div><div id="peopleProgress"></div><div class="info-strip"><span>✓</span><p>Ao marcar um dia, são registrados R$ 30 para a pessoa. Você também pode editar valores parciais ou extras.</p></div></article>
+          <article class="white-card"><div class="section-header"><div><span class="eyebrow blue">NOSSO CALENDÁRIO</span><h2>Próximas metas</h2></div><span class="section-symbol">✳</span></div><div id="upcomingMilestones"></div><button class="text-link" data-goto="cambio">Ver calendário de compra de euros <span>→</span></button></article>
+        </div>
+        <div class="two-col overview-bottom">
+          <article class="white-card"><div class="section-header"><div><span class="eyebrow blue">DIVISÃO DO DIA</span><h2>R$ 30 por pessoa</h2></div></div><div class="envelopes"><div><span class="envelope-icon">€</span><strong>R$ 23</strong><small>para comprar euros</small></div><div><span class="envelope-icon">✈</span><strong>R$ 7</strong><small>para as passagens</small></div></div><p class="muted-note">Câmbio de planejamento: R$ 7 por € 1. O valor real de euros só aparece depois que você registrar uma conversão.</p></article>
+          <article class="white-card"><div class="section-header"><div><span class="eyebrow blue">STATUS DE HOJE</span><h2 id="todayHeading">Economias do dia</h2></div></div><div id="todayProgress"></div><button class="btn btn-outline btn-full" data-goto="diario">Abrir meu diário <span>→</span></button></article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-diario" hidden>
+        <div class="section-header page-section-header"><div><span class="eyebrow blue">UM DIA DE CADA VEZ</span><h2>Checklist diário</h2><p>Toque no quadradinho depois de guardar sua parte. Você pode editar o valor de cada dia.</p></div><div class="month-navigation"><button id="prevMonth" class="nav-arrow" aria-label="Mês anterior">‹</button><select id="monthSelect" aria-label="Escolher mês"></select><button id="nextMonth" class="nav-arrow" aria-label="Próximo mês">›</button></div></div>
+        <div class="month-summary"><div><span>META MENSAL DO CASAL</span><strong id="monthTarget">R$ 0</strong></div><div><span>REGISTRADO NESTE MÊS</span><strong id="monthReal">R$ 0</strong></div><div><span>DIAS NO MÊS</span><strong id="monthDays">0</strong></div></div>
+        <div class="table-shell"><table class="data-table daily-table"><thead><tr><th>DATA</th><th id="dailyHead1">PESSOA 1</th><th id="dailyHead2">PESSOA 2</th><th>TOTAL REAL</th><th>STATUS</th><th class="admin-only">EDITAR</th></tr></thead><tbody id="dailyBody"></tbody></table></div>
+        <p class="small-help">✓ = meta de R$ 30 atingida por aquela pessoa. Clique no valor para informar outro depósito.</p>
+      </section>
+
+      <section class="tab-panel" id="panel-semanas" hidden><div class="section-header page-section-header"><div><span class="eyebrow blue">145 SEMANAS NO PLANO</span><h2>Checklist semanal</h2><p>Metas de R$ 210 por pessoa e R$ 420 por casal, exceto a última semana de 4 dias.</p></div><select id="weekFilter" aria-label="Filtrar semanas"><option value="all">Todas as semanas</option><option value="pending">Somente incompletas</option><option value="complete">Somente concluídas</option></select></div><div id="weeklySummary" class="mini-summary"></div><div class="table-shell"><table class="data-table"><thead><tr><th>SEMANA</th><th>PERÍODO</th><th>META CASAL</th><th>GUARDADO</th><th>PROGRESSO</th></tr></thead><tbody id="weeklyBody"></tbody></table></div></section>
+
+      <section class="tab-panel" id="panel-meses" hidden><div class="section-header page-section-header"><div><span class="eyebrow blue">NOV 2026 — AGO 2029</span><h2>Metas mensais</h2><p>As metas são calculadas pelos dias reais de cada mês.</p></div></div><div class="table-shell"><table class="data-table"><thead><tr><th>MÊS</th><th>META CASAL</th><th>GUARDADO</th><th>ACUMULADO REAL</th><th>STATUS</th></tr></thead><tbody id="monthlyBody"></tbody></table></div></section>
+
+      <section class="tab-panel" id="panel-cambio" hidden><div class="section-header page-section-header"><div><span class="eyebrow blue">A CADA SETE SEMANAS</span><h2>Compra de euros</h2><p>20 trocas programadas, mais o fechamento de 32 dias no fim de agosto de 2029.</p></div><span class="euros-decoration">€</span></div><div id="exchangeSummary" class="month-summary"></div><div id="exchangeList" class="exchange-grid"></div><p class="small-help">Registre o valor real gasto em reais e o valor efetivamente recebido em euros. Os registros de câmbio não são somados novamente ao dinheiro guardado.</p></section>
+
+      <section class="tab-panel" id="panel-config" hidden><div class="two-col"><article class="white-card"><div class="section-header"><div><span class="eyebrow blue">CONFIGURAÇÕES</span><h2>Nosso plano</h2></div></div><form id="peopleForm"><label class="field-label" for="nameP1">Pessoa 1</label><input id="nameP1" maxlength="32" required><label class="field-label" for="nameP2">Pessoa 2</label><input id="nameP2" maxlength="32" required><button class="btn btn-primary admin-only" type="submit">Salvar nomes</button></form><div class="settings-details"><div><span>Início</span><strong>24/11/2026</strong></div><div><span>Fim</span><strong>31/08/2029</strong></div><div><span>Meta diária por pessoa</span><strong>R$ 30</strong></div><div><span>Passagem por pessoa</span><strong>R$ 6.500</strong></div><div><span>Hospedagem Airbnb por pessoa</span><strong>€ 944</strong></div></div></article><article class="white-card"><div class="section-header"><div><span class="eyebrow blue">CÓPIA DE SEGURANÇA</span><h2>Backup em JSON</h2></div></div><p class="settings-description">O banco compartilhado fica na Netlify. Baixe o JSON para guardar uma cópia e restaurar futuramente, caso seja necessário.</p><button id="downloadBackup" class="btn btn-outline btn-full">↓ Baixar backup JSON</button><button id="uploadBackup" class="btn btn-soft btn-full admin-only">↑ Restaurar de arquivo JSON</button><input id="backupFile" type="file" accept="application/json,.json" hidden><div class="security-note"><span>🔐</span><p><strong>Acesso protegido</strong><br>O administrador pode salvar e restaurar. A segunda senha permite consultar os dados sem modificá-los. As senhas são gerenciadas nas variáveis da Netlify.</p></div><div class="status-actions"><button id="reloadServer" class="text-link" type="button">↻ Atualizar os dados do servidor</button><button id="retrySave" class="text-link admin-only" type="button">↻ Tentar salvar alterações pendentes</button></div></article></div></section>
+      <footer class="app-footer"><span>✦ EUROPA 2029 <small>Um sonho dividido é um sonho ainda maior.</small></span><span>Feito para acompanhar cada conquista, sem pressa.</span></footer>
+    </div>
+  </div>
+
+  <dialog id="dayDialog" class="modal"><form method="dialog" id="dayForm"><div class="modal-head"><span class="eyebrow blue">EDITAR DEPÓSITOS</span><button type="button" data-close="dayDialog" class="close-button" aria-label="Fechar">×</button></div><h3 id="dayDialogTitle">Economia do dia</h3><p>Informe quanto cada pessoa realmente guardou nessa data.</p><label class="field-label" for="dayAmount1" id="dayLabel1">Pessoa 1 · R$</label><input id="dayAmount1" type="number" min="0" step="0.01" required><label class="field-label" for="dayAmount2" id="dayLabel2">Pessoa 2 · R$</label><input id="dayAmount2" type="number" min="0" step="0.01" required><button class="btn btn-primary btn-full" value="save" type="submit">Salvar valores</button></form></dialog>
+
+  <dialog id="exchangeDialog" class="modal"><form method="dialog" id="exchangeForm"><div class="modal-head"><span class="eyebrow blue">COMPRA DE EUROS</span><button type="button" data-close="exchangeDialog" class="close-button" aria-label="Fechar">×</button></div><h3 id="exchangeDialogTitle">Registrar conversão</h3><p>Preencha os valores reais da compra; cada pessoa pode converter em dias diferentes.</p><div class="exchange-edit-group"><label class="check-row"><input id="fxDone1" type="checkbox"><span id="fxLabel1">Pessoa 1 · compra concluída</span></label><div class="split-fields"><div><label class="field-label" for="fxBRL1">Reais usados</label><input id="fxBRL1" type="number" min="0" step="0.01" value="0"></div><div><label class="field-label" for="fxEUR1">Euros recebidos</label><input id="fxEUR1" type="number" min="0" step="0.01" value="0"></div></div></div><div class="exchange-edit-group"><label class="check-row"><input id="fxDone2" type="checkbox"><span id="fxLabel2">Pessoa 2 · compra concluída</span></label><div class="split-fields"><div><label class="field-label" for="fxBRL2">Reais usados</label><input id="fxBRL2" type="number" min="0" step="0.01" value="0"></div><div><label class="field-label" for="fxEUR2">Euros recebidos</label><input id="fxEUR2" type="number" min="0" step="0.01" value="0"></div></div></div><button class="btn btn-primary btn-full" value="save" type="submit">Salvar compra</button></form></dialog>
+</body>
+</html>
