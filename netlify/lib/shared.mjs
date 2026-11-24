@@ -13,12 +13,17 @@ export function reply(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), { status, headers: { ...baseHeaders, ...headers } });
 }
 
-export function environmentIsReady() {
+// Apenas nomes/regras são relatados em logs; valores secretos jamais são registrados.
+export function environmentProblems() {
   const { APP_ADMIN_PASSWORD, APP_VIEWER_PASSWORD, APP_SESSION_SECRET } = process.env;
-  return [APP_ADMIN_PASSWORD, APP_VIEWER_PASSWORD].every((v) => typeof v === 'string' && /^\d{6}$/.test(v))
-    && typeof APP_SESSION_SECRET === 'string' && APP_SESSION_SECRET.length >= 48
-    && APP_ADMIN_PASSWORD !== APP_VIEWER_PASSWORD;
+  const problems = [];
+  if (typeof APP_ADMIN_PASSWORD !== 'string' || !/^\d{6}$/.test(APP_ADMIN_PASSWORD)) problems.push('APP_ADMIN_PASSWORD precisa de 6 dígitos');
+  if (typeof APP_VIEWER_PASSWORD !== 'string' || !/^\d{6}$/.test(APP_VIEWER_PASSWORD)) problems.push('APP_VIEWER_PASSWORD precisa de 6 dígitos');
+  if (typeof APP_SESSION_SECRET !== 'string' || APP_SESSION_SECRET.length < 48) problems.push('APP_SESSION_SECRET precisa de 48+ caracteres');
+  if (APP_ADMIN_PASSWORD && APP_VIEWER_PASSWORD && APP_ADMIN_PASSWORD === APP_VIEWER_PASSWORD) problems.push('Os dois PINs precisam ser diferentes');
+  return problems;
 }
+export function environmentIsReady() { return environmentProblems().length === 0; }
 
 export function sameOrigin(request) {
   const origin = request.headers.get('origin');

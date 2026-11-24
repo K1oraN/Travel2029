@@ -1,8 +1,11 @@
 import { getStore } from '@netlify/blobs';
-import { reply, environmentIsReady, sameOrigin, userFromRequest, emptyData, sanitizeData, limitedJSON } from '../lib/shared.mjs';
+import { reply, environmentIsReady, environmentProblems, sameOrigin, userFromRequest, emptyData, sanitizeData, limitedJSON } from '../lib/shared.mjs';
 
 export default async (request) => {
-  if (!environmentIsReady()) return reply({ error: 'Acesso temporariamente indisponível. Tente novamente em instantes.' }, 503);
+  if (!environmentIsReady()) {
+    console.error('[Europa2029] Configuração incompleta na função progress: ' + environmentProblems().join('; ') + '. Confira escopo Functions/Production e faça novo deploy.');
+    return reply({ error: 'Nosso diário está indisponível no momento.' , code: 'SERVICE_CONFIG' }, 503);
+  }
   const user = userFromRequest(request);
   if (!user) return reply({ error: 'Faça login para visualizar o progresso.' }, 401);
   if (!['GET', 'PUT'].includes(request.method)) return reply({ error: 'Método não permitido' }, 405, { Allow: 'GET, PUT' });

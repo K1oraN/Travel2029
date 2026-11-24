@@ -163,14 +163,24 @@ function renderAll() {
   $('#statPercent').textContent = nfmt((t.total / 60_720) * 100) + '%';
   const safePct = Math.min(100, (t.total / 60_720) * 100);
   $('#heroPercent').textContent = nfmt(safePct) + '%';
-  $('#heroDonut').style.setProperty('--progress', safePct.toFixed(2) + '%');
-  $('#heroProgressLine').style.width = safePct.toFixed(2) + '%';
+  // Classes externas evitam estilos inline e respeitam style-src 'self'.
+  const progressClass = 'progress-' + Math.round(safePct);
+  const donut = $('#heroDonut');
+  for (const name of [...donut.classList]) if (name.startsWith('progress-')) donut.classList.remove(name);
+  donut.classList.add(progressClass);
+  const heroLine = $('#heroProgressLine');
+  for (const name of [...heroLine.classList]) if (name.startsWith('progress-')) heroLine.classList.remove(name);
+  heroLine.classList.add(progressClass);
   renderOverview(t);
   renderDaily();
   renderWeekly();
   renderMonthly();
   renderExchanges();
-  document.querySelectorAll('i[data-pct]').forEach((el) => { el.style.width = el.dataset.pct + '%'; });
+  document.querySelectorAll('i[data-pct]').forEach((el) => {
+    const value = Number(el.dataset.pct);
+    const level = Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
+    el.classList.add('progress-' + level);
+  });
   $('#nameP1').value = pName(0); $('#nameP2').value = pName(1);
   $('#nameP1').disabled = !isAdmin(); $('#nameP2').disabled = !isAdmin();
 }
@@ -353,7 +363,7 @@ function wireEvents() {
       setSave('Sincronizado');
     } catch (err) {
       $('#loginError').hidden=false;
-      $('#loginError').textContent=err.status === 503 ? 'Acesso temporariamente indisponível. Tente novamente em instantes.' : err.message;
+      $('#loginError').textContent=err.status === 503 ? 'Nosso diário está indisponível no momento. Tente novamente mais tarde.' : err.message;
     } finally { button.disabled=false; }
   });
   $('#logoutButton').addEventListener('click',async()=>{
@@ -451,7 +461,7 @@ async function init() {
     }
   } catch(err) {
     if(err.status===503) {
-      $('#loginError').textContent=err.status === 503 ? 'Acesso temporariamente indisponível. Tente novamente em instantes.' : err.message;
+      $('#loginError').textContent=err.status === 503 ? 'Nosso diário está indisponível no momento. Tente novamente mais tarde.' : err.message;
       $('#loginError').hidden=false;
     }
   }

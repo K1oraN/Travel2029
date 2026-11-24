@@ -132,3 +132,36 @@ git push origin main
 6. Faça uma cópia JSON do progresso antes de atualizar, especialmente se você já registrou economias.
 
 Este ZIP é para **substituir o código do mesmo site Netlify**, não para criar outra instância. Assim ele continua consultando o mesmo banco.
+
+
+## Correção de login HTTP 503 e bloqueio CSP — novembro/2026
+
+Esta atualização removeu os estilos embutidos do HTML e substituiu os ajustes de largura via JavaScript por classes CSS externas. A política de segurança permanece restrita (`script-src 'self'; style-src 'self'`), sem `unsafe-inline`.
+
+**Atenção:** alterar o ZIP não preenche as variáveis secretas da sua conta Netlify. Se a função de login retornar 503, abra **Project configuration → Environment variables** e confirme:
+
+- `APP_ADMIN_PASSWORD`: exatamente seis números;
+- `APP_VIEWER_PASSWORD`: seis números DIFERENTES da primeira;
+- `APP_SESSION_SECRET`: no mínimo 48 caracteres, preferencialmente aleatórios;
+- Escopo de cada variável: **Functions** ou **All**;
+- Contexto: **Production** (ou All contexts, se preferir).
+
+Não adicione aspas ou espaços extras em volta dos valores. Gere o segredo no PowerShell:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+Após salvar as variáveis, vá em **Deploys → Trigger deploy → Deploy site**, pois alterações nas variáveis de Functions precisam de um novo deploy. Abra `https://SEU-SITE.netlify.app/.netlify/functions/auth` em uma aba anônima: com configuração correta, retorna `{"authenticated":false,"role":null}` (status 200). Se continuar 503, abra **Logs → Functions → auth**. A função agora informa **somente quais nomes/regras** estão incorretos, sem imprimir os valores das senhas.
+
+Os erros de console `about:srcdoc` podem vir de pré-visualizadores, iframes ou extensões externos. O aplicativo entregue não usa `srcdoc` nem scripts inline; mantenha a CSP estrita, sem habilitar `unsafe-inline`.
+
+Substitua os arquivos do repositório existente e publique no MESMO projeto Netlify para preservar o Netlify Blobs de progresso. NÃO remova a pasta `.git` do seu repositório local e NÃO publique os PINs no GitHub.
+
+```powershell
+npm test
+npm run check
+git add -A
+git commit -m "Corrigir CSP e diagnóstico do login"
+git push origin main
+```

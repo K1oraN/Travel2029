@@ -1,8 +1,11 @@
 import { getStore } from '@netlify/blobs';
-import { reply, environmentIsReady, sameOrigin, safeEqual, cookieFor, clearCookie, userFromRequest, limitedJSON, clientHash } from '../lib/shared.mjs';
+import { reply, environmentIsReady, environmentProblems, sameOrigin, safeEqual, cookieFor, clearCookie, userFromRequest, limitedJSON, clientHash } from '../lib/shared.mjs';
 
 export default async (request) => {
-  if (!environmentIsReady()) return reply({ error: 'Acesso temporariamente indisponível. Tente novamente em instantes.' }, 503);
+  if (!environmentIsReady()) {
+    console.error('[Europa2029] Configuração incompleta na função auth: ' + environmentProblems().join('; ') + '. Confira escopo Functions/Production e faça novo deploy.');
+    return reply({ error: 'Nosso diário está indisponível no momento.' , code: 'SERVICE_CONFIG' }, 503);
+  }
 
   if (request.method === 'GET') {
     return reply({ authenticated: Boolean(userFromRequest(request)), role: userFromRequest(request)?.role || null });
