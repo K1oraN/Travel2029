@@ -12,13 +12,13 @@ Este ZIP contém um site real para publicar na Netlify. A parte visual foi inspi
 - Compra de euros: registrar conclusão, reais pagos e euros recebidos de cada pessoa.
 - Backup JSON para baixar; restauração JSON pelo administrador.
 - Um **banco JSON privado e persistente (Netlify Blobs)**, compartilhado automaticamente entre os navegadores.
-- **Senha de administrador** (pode alterar) e **senha de visualização** (pode apenas acompanhar).
+- **PIN de administrador** (pode alterar) e **PIN de visualização** (pode apenas acompanhar).
 - O painel de visualização recarrega os dados a cada 45 segundos, quando a página está ativa, ou ao voltar à página. Também pode clicar em atualizar.
 
 ## Estrutura
 
 ```text
-Europa_2029_Netlify_Seguro/
+Europa_2029_Netlify_Moderno/
 ├── public/
 │   ├── index.html         ← site
 │   ├── style.css          ← visual
@@ -49,8 +49,8 @@ Europa_2029_Netlify_Seguro/
 
 | Variável | O que colocar |
 |---|---|
-| `APP_ADMIN_PASSWORD` | Uma senha **sua**, forte, de pelo menos 12 caracteres |
-| `APP_VIEWER_PASSWORD` | Outra senha **diferente**, de pelo menos 12 caracteres, para sua namorada |
+| `APP_ADMIN_PASSWORD` | Sua senha pessoal de EXATAMENTE 6 números |
+| `APP_VIEWER_PASSWORD` | Outra senha **diferente**, de EXATAMENTE 6 números, para sua namorada |
 | `APP_SESSION_SECRET` | Segredo aleatório de 48 caracteres ou mais, separado das senhas |
 
 Para gerar o segredo no Windows PowerShell, se tiver Node instalado:
@@ -62,7 +62,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 Copie o texto gerado e use apenas como valor da variável `APP_SESSION_SECRET`. **Não envie as senhas aqui no chat e não as coloque no HTML, no JSON, no GitHub ou no ZIP.**
 
 6. Faça o primeiro deploy/redeploy após configurar essas variáveis.
-7. Abra a URL `https://seu-site.netlify.app`. Faça login como **Administrador** para registrar os depósitos; envie a URL e **somente a senha de visualização** para sua namorada.
+7. Abra a URL `https://seu-site.netlify.app`. Faça login como **Administrador** para registrar os depósitos; envie a URL e **somente o PIN de visualização** para sua namorada.
 8. Acesse `https://seu-site.netlify.app/.netlify/functions/auth` no navegador para verificar se a API responde JSON (é normal responder `authenticated:false` sem login). Se retornar `404`, as Functions não foram publicadas; use o deploy via Git/GitHub.
 
 ### Alternativa: Netlify Drop
@@ -83,7 +83,7 @@ Em projetos conectados a uma conta Netlify, a publicação por *drag & drop* pod
 - Os dados reais de progresso são privados e exigem sessão autenticada para ler ou alterar.
 - Apenas o administrador pode alterar depósitos, nomes e compras de euros.
 - As senhas ficam no painel de variáveis da Netlify, **não no site**.
-- Cookies de sessão são assinados, HttpOnly, SameSite Strict e Secure em HTTPS, com validade de 7 dias. O login tem limite básico de tentativas.
+- Cookies de sessão são assinados, HttpOnly, SameSite Strict e Secure em HTTPS, com validade de 7 dias. O login limita a cinco tentativas incorretas por janela de 15 minutos e por IP. Seis números são menos seguros que uma senha longa: não compartilhe os códigos nem publique em arquivos.
 - A gravação usa uma verificação de versão para evitar sobrescrever silenciosamente dados de outra aba.
 - Se mudar as senhas, atualize também `APP_SESSION_SECRET` para encerrar todas as sessões existentes.
 - O `plano.json` é **público** e contém só as metas fixas, sem nomes, saldos ou registros particulares.
@@ -102,3 +102,33 @@ Execute `npm install`, `npm test` e `npm run check` para validar. Para rodar as 
 - https://docs.netlify.com/build/data-and-storage/netlify-blobs/
 - https://docs.netlify.com/build/functions/configuration/
 - https://docs.netlify.com/build/functions/environment-variables/
+
+## Atualização de visual e senhas em seis dígitos
+
+- O login aceita exatamente seis números. As duas senhas DEVEM continuar diferentes.
+- Os PINs são configurados somente em Environment variables na Netlify. O projeto não inclui senhas reais.
+- Após publicar uma alteração de código, confirme em **Deploys** que a nova versão foi publicada; se alterar os PINs, inicie outro deploy para aplicar.
+- A tela de login é pública para quem conhece o link, mas o progresso JSON e a edição exigem autenticação no servidor. Os registros são armazenados separadamente em Netlify Blobs.
+- Há modo escuro (padrão) e claro. A preferência visual é mantida somente no navegador de cada pessoa.
+- Os dados do site antigo são preservados **se continuar usando o mesmo projeto Netlify**: não crie outro projeto nem altere o identificador do armazenamento.
+
+## Atualizar o projeto Travel2029 existente (Windows / PowerShell)
+
+1. Extraia este ZIP. Abra a pasta que contém o repositório `Travel2029` no seu computador.
+2. Copie **todo o conteúdo** extraído para dentro da pasta existente e aceite substituir os arquivos. Preserve a pasta `.git` do seu repositório.
+3. No PowerShell, dentro da pasta do projeto, execute:
+
+```powershell
+npm install
+npm test
+npm run check
+git add -A
+git commit -m "Atualizar visual e acesso de 6 digitos"
+git push origin main
+```
+
+4. Confirme a publicação em Netlify → Deploys. O site terá a tela de acesso simplificada e painel em modo escuro.
+5. Se as variáveis `APP_ADMIN_PASSWORD` e `APP_VIEWER_PASSWORD` **já contêm os dois PINs diferentes de seis dígitos**, não é necessário redefini-los. `APP_SESSION_SECRET` deve continuar com ao menos 48 caracteres.
+6. Faça uma cópia JSON do progresso antes de atualizar, especialmente se você já registrou economias.
+
+Este ZIP é para **substituir o código do mesmo site Netlify**, não para criar outra instância. Assim ele continua consultando o mesmo banco.

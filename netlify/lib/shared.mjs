@@ -15,7 +15,7 @@ export function reply(data, status = 200, headers = {}) {
 
 export function environmentIsReady() {
   const { APP_ADMIN_PASSWORD, APP_VIEWER_PASSWORD, APP_SESSION_SECRET } = process.env;
-  return [APP_ADMIN_PASSWORD, APP_VIEWER_PASSWORD].every((v) => typeof v === 'string' && v.length >= 12)
+  return [APP_ADMIN_PASSWORD, APP_VIEWER_PASSWORD].every((v) => typeof v === 'string' && /^\d{6}$/.test(v))
     && typeof APP_SESSION_SECRET === 'string' && APP_SESSION_SECRET.length >= 48
     && APP_ADMIN_PASSWORD !== APP_VIEWER_PASSWORD;
 }

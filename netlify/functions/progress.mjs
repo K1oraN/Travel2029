@@ -2,7 +2,7 @@ import { getStore } from '@netlify/blobs';
 import { reply, environmentIsReady, sameOrigin, userFromRequest, emptyData, sanitizeData, limitedJSON } from '../lib/shared.mjs';
 
 export default async (request) => {
-  if (!environmentIsReady()) return reply({ error: 'Configure as três variáveis de segurança na Netlify antes de usar o site.' }, 503);
+  if (!environmentIsReady()) return reply({ error: 'Acesso temporariamente indisponível. Tente novamente em instantes.' }, 503);
   const user = userFromRequest(request);
   if (!user) return reply({ error: 'Faça login para visualizar o progresso.' }, 401);
   if (!['GET', 'PUT'].includes(request.method)) return reply({ error: 'Método não permitido' }, 405, { Allow: 'GET, PUT' });
@@ -23,6 +23,6 @@ export default async (request) => {
   } catch (error) {
     if (error instanceof SyntaxError || error?.message?.includes('inválid') || error?.message?.includes('incompatível') || error?.message?.includes('demais') || error?.message?.includes('grande') || error?.message?.includes('mais dias')) return reply({ error: error.message || 'JSON inválido' }, 400);
     console.error('progress storage error', error?.message);
-    return reply({ error: 'Falha ao acessar o banco de dados. Consulte as Functions da Netlify.' }, 500);
+    return reply({ error: 'Não foi possível sincronizar agora. Tente novamente em instantes.' }, 500);
   }
 };

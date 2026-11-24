@@ -20,10 +20,16 @@ test('quantias negativas não são aceitas', () => {
   assert.throws(()=>sanitizeData(v));
 });
 test('credenciais e cookie HTTP-only assinado', () => {
-  process.env.APP_ADMIN_PASSWORD='long-admin-123456';
-  process.env.APP_VIEWER_PASSWORD='long-viewer-123456';
+  process.env.APP_ADMIN_PASSWORD='145896';
+  process.env.APP_VIEWER_PASSWORD='369741';
   process.env.APP_SESSION_SECRET='a'.repeat(64);
   assert.equal(environmentIsReady(), true);
+  process.env.APP_VIEWER_PASSWORD='12345';
+  assert.equal(environmentIsReady(), false);
+  process.env.APP_VIEWER_PASSWORD='369741';
+  process.env.APP_ADMIN_PASSWORD='s3nhA!';
+  assert.equal(environmentIsReady(), false);
+  process.env.APP_ADMIN_PASSWORD='145896';
   assert.equal(safeEqual('a', 'a'), true);
   assert.equal(safeEqual('a', 'b'), false);
   const request=new Request('https://exemplo.netlify.app/.netlify/functions/auth');

@@ -151,16 +151,20 @@ function pill(value, target) {
   return '<span class="pill">Pendente</span>';
 }
 function renderAll() {
-  $('#roleChip').textContent = isAdmin() ? 'Administrador' : 'Somente leitura';
+  $('#roleChip').textContent = isAdmin() ? 'Editar' : 'Acompanhar';
   $('.role-chip').title = isAdmin() ? 'Pode editar os dados' : 'Pode apenas visualizar os dados';
   for (const el of document.querySelectorAll('.admin-only')) el.hidden = !isAdmin();
-  $('#heroToday').textContent = isAdmin() ? 'Marcar economia de hoje ↗' : 'Consultar economia de hoje ↗';
+  $('#heroToday').innerHTML = isAdmin() ? 'Registrar hoje <span>↗</span>' : 'Ver hoje <span>↗</span>'; 
   $('#lastSync').textContent = formatUpdated();
   const t = totals();
   $('#statSaved').textContent = ptMoney(t.total);
   $('#statRemaining').textContent = ptMoney(Math.max(0, 60_720 - t.total));
   $('#statDays').innerHTML = `${t.complete} <small>/ 1.012</small>`;
   $('#statPercent').textContent = nfmt((t.total / 60_720) * 100) + '%';
+  const safePct = Math.min(100, (t.total / 60_720) * 100);
+  $('#heroPercent').textContent = nfmt(safePct) + '%';
+  $('#heroDonut').style.setProperty('--progress', safePct.toFixed(2) + '%');
+  $('#heroProgressLine').style.width = safePct.toFixed(2) + '%';
   renderOverview(t);
   renderDaily();
   renderWeekly();
@@ -188,7 +192,7 @@ function renderOverview(t) {
   ].map(([icon, title, sub, tail]) => `<div class="milestone-row"><span class="milestone-icon">${icon}</span><div><strong>${title}</strong><small>${sub}</small></div><span>${tail}</span></div>`).join('');
   const date = today < dateFromIndex(0) ? dateFromIndex(0) : today > dateFromIndex(daysCount-1) ? dateFromIndex(daysCount-1) : today;
   $('#todayHeading').textContent = 'Economias de ' + displayDate(date, { day: '2-digit', month: 'long' });
-  $('#todayProgress').innerHTML = [0,1].map(i=>{const x=amount(date,`p${i+1}`);return `<div class="today-row"><strong>${escapeHTML(pName(i))}</strong><span class="${x>=30?'positive':'negative'}">${x>=30?'✓':''} ${ptMoney(x)} / R$ 30</span></div>`}).join('') + '<div class="today-state">Use o diário para registrar ou corrigir depósitos.</div>';
+  $('#todayProgress').innerHTML = [0,1].map(i=>{const x=amount(date,`p${i+1}`);return `<div class="today-row"><strong>${escapeHTML(pName(i))}</strong><span class="${x>=30?'positive':'negative'}">${x>=30?'✓':''} ${ptMoney(x)} / R$ 30</span></div>`}).join('') + '<div class="today-state">Cada conquista vale a pena celebrar. ✦</div>';
 }
 function renderDaily() {
   const currentMonth = allMonths.find(m => m.id === state.month) || allMonths[0];
@@ -310,7 +314,32 @@ function logoutLocal(message='') {
   $('#loginError').hidden=!message; $('#loginError').textContent=message;
 }
 
+function applyTheme(theme) {
+  const selected = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = selected;
+  $('#themeIcon').textContent = selected === 'dark' ? '☀' : '☾';
+  $('#themeButton').title = selected === 'dark' ? 'Ativar tema claro' : 'Ativar modo escuro';
+  $('#themeButton').setAttribute('aria-label', $('#themeButton').title);
+  try { localStorage.setItem('europa2029-theme', selected); } catch { /* navegação privada */ }
+}
 function wireEvents() {
+  for (const b of document.querySelectorAll('[data-role]')) b.addEventListener('click', () => {
+    $('#loginRole').value = b.dataset.role;
+    document.querySelectorAll('[data-role]').forEach(option => {
+      const selected = option === b;
+      option.classList.toggle('selected', selected);
+      option.setAttribute('aria-pressed', String(selected));
+    });
+  });
+  $('#togglePassword').addEventListener('click', () => {
+    const input = $('#loginPassword');
+    const visible = input.type === 'password';
+    input.type = visible ? 'text' : 'password';
+    $('#togglePassword').setAttribute('aria-pressed', String(visible));
+    $('#togglePassword').setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
+    $('#togglePassword').textContent = visible ? '◌' : '◉';
+  });
+  $('#themeButton').addEventListener('click', () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
   $('#loginForm').addEventListener('submit', async(event)=>{
     event.preventDefault();
     const button=$('#loginButton'); button.disabled=true; $('#loginError').hidden=true;
@@ -324,7 +353,7 @@ function wireEvents() {
       setSave('Sincronizado');
     } catch (err) {
       $('#loginError').hidden=false;
-      $('#loginError').textContent=err.message;
+      $('#loginError').textContent=err.status === 503 ? 'Acesso temporariamente indisponível. Tente novamente em instantes.' : err.message;
     } finally { button.disabled=false; }
   });
   $('#logoutButton').addEventListener('click',async()=>{
@@ -408,6 +437,9 @@ async function init() {
   const opts=allMonths.map(m=>`<option value="${m.id}">${escapeHTML(m.label.charAt(0).toUpperCase()+m.label.slice(1))}</option>`).join('');
   $('#monthSelect').innerHTML=opts;
   wireEvents();
+  let preferred = 'dark';
+  try { preferred = localStorage.getItem('europa2029-theme') || 'dark'; } catch {}
+  applyTheme(preferred);
   try {
     const session=await callAPI('auth');
     if(session.authenticated) {
@@ -419,7 +451,7 @@ async function init() {
     }
   } catch(err) {
     if(err.status===503) {
-      $('#loginError').textContent=err.message;
+      $('#loginError').textContent=err.status === 503 ? 'Acesso temporariamente indisponível. Tente novamente em instantes.' : err.message;
       $('#loginError').hidden=false;
     }
   }

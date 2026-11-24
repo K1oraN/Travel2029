@@ -2,7 +2,7 @@ import { getStore } from '@netlify/blobs';
 import { reply, environmentIsReady, sameOrigin, safeEqual, cookieFor, clearCookie, userFromRequest, limitedJSON, clientHash } from '../lib/shared.mjs';
 
 export default async (request) => {
-  if (!environmentIsReady()) return reply({ error: 'Configure APP_ADMIN_PASSWORD, APP_VIEWER_PASSWORD e APP_SESSION_SECRET na Netlify. Senhas com 12+ caracteres; segredo com 48+.' }, 503);
+  if (!environmentIsReady()) return reply({ error: 'Acesso temporariamente indisponível. Tente novamente em instantes.' }, 503);
 
   if (request.method === 'GET') {
     return reply({ authenticated: Boolean(userFromRequest(request)), role: userFromRequest(request)?.role || null });
@@ -19,7 +19,7 @@ export default async (request) => {
     const key = `tries-${clientHash(request)}`;
     const now = Date.now();
     let count = await store.get(key, { type: 'json', consistency: 'strong' }) || { attempts: 0, until: 0 };
-    if (count.until > now && count.attempts >= 8) return reply({ error: 'Muitas tentativas. Aguarde 15 minutos.' }, 429);
+    if (count.until > now && count.attempts >= 5) return reply({ error: 'Muitas tentativas. Aguarde 15 minutos.' }, 429);
     if (count.until <= now) count = { attempts: 0, until: now + 15 * 60 * 1000 };
     const target = role === 'admin' ? process.env.APP_ADMIN_PASSWORD : process.env.APP_VIEWER_PASSWORD;
     if (!safeEqual(password, target)) {
@@ -31,6 +31,6 @@ export default async (request) => {
   } catch (error) {
     if (error instanceof SyntaxError) return reply({ error: 'Solicitação inválida' }, 400);
     console.error('auth storage error', error?.message);
-    return reply({ error: 'Erro de acesso. Confira as Functions no painel Netlify.' }, 500);
+    return reply({ error: 'Não foi possível entrar agora. Tente novamente em instantes.' }, 500);
   }
 };
